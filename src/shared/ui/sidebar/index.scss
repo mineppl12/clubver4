@@ -1,0 +1,193 @@
+@use "~shared/styles/variables.scss" as *;
+
+::-webkit-scrollbar { width: 0; }
+
+.sidebar{
+    $width: $sidebarWidth;
+
+    width: $width;
+    height: 100%;
+    position: fixed;
+    @if ($devMode) { background: #acf; }
+
+    .sidebar_wrap{
+        width: calc($width - $space * 2);
+        height: calc(100% - $space * 3);
+        background: #343a40;
+        position: absolute;
+        top: calc($space * 1.5); left: calc($space * 1.5);
+        border-radius: calc($space);
+        overflow-y: hidden;
+    
+        z-index: 2;
+    }
+    
+    $headHeight: 75px;
+
+    .head{
+        width: 100%;
+        height: $headHeight;
+        position: absolute;
+        cursor: pointer;
+
+        .logo{
+            width: $headHeight * 0.7;
+            height: $headHeight * 0.7;
+            position: absolute;
+            top: 50%; left: 20px;
+            transform: translate(0, -50%);
+        }
+
+        .title{
+            width: max-content;
+            height: 50px;
+            color: $textColorLight;
+            position: absolute;
+            top: 50%; left: calc(30px + $headHeight * 0.7);
+            transform: translate(0, -50%);
+            font-size: 15px;
+            line-height: 25px;
+            font-family: "Sejong";
+            font-weight: 100;
+
+            span { display: block; }
+            .subtitle { font-size: 25px; }
+        }
+
+        &::after{
+            content: '';
+            width: 90%;
+            height: 1px;
+            background: rgba($textColorLight, .3);
+            position: absolute;
+            left: 50%; bottom: 0;
+            transform: translate(-50%, 0);
+        }
+    }
+
+    .body{
+        width: 100%;
+        height: calc(100% - $headHeight);
+        position: absolute;
+        bottom: 0;
+        overflow-y: scroll;
+
+        .group{
+            width: 100%;
+            margin-top: 40px;
+
+            &.noLegend { margin-top: 0px; }
+            &:nth-last-child(1){ 
+                padding-bottom: 150px;
+            }
+
+            .legend{
+                width: max-content;
+                height: 20px;
+                color: rgba($textColorLight, .6);
+                position: relative;
+                top: 5px;
+                font-size: 15px;
+                font-weight: 400;
+                padding-left: 10%;
+                margin: 0;
+            }
+
+            .linkWrap{
+                width: 90%;
+                height: auto;
+                position: relative;
+                top: 10px; left: 5%;
+                list-style: none;
+                overflow: hidden;
+                transition: max-height .8s;
+                padding: 0;
+                margin: 0;
+
+                .link{
+                    $linkColor: rgba($textColorLight, .8);
+
+                    width: 100%;
+                    height: 40px;
+                    color: $linkColor;
+                    background: transparent;
+                    position: relative;
+                    margin-top: 5px;
+                    cursor: pointer;
+                    transition: background-color .2s;
+                    display: block;
+
+                    border-radius: 5px;
+
+                    .icon{
+                        width: 20px;
+                        height: 20px;
+                        position: absolute;
+                        top: 50%; left: 16px;
+                        transform: translate(0, -50%);
+                    }
+
+                    .links{
+                        width: max-content;
+                        height: 100%;
+                        color: $linkColor;
+                        position: absolute;
+                        top: 0; left: 50px;
+                        text-decoration: none;
+                        line-height: 40px;
+                        font-size: 16px;
+                        font-weight: 400;
+                        outline: none;
+                    }
+
+                    .slide{
+                        width: 15px;
+                        height: 15px;
+                        color: $textColorLight;
+                        position: absolute;
+                        top: 50%; right: 10px;
+                        transform: translate(0, -50%) rotate(0);
+                        transition: transform .3s;
+                    }
+
+                    &.headerLink{
+                        background: rgba($textColorLight, .1);
+                    }
+
+                    &:hover{
+                        background: rgba($textColorLight, .1);
+                    }
+
+                    &.watching{
+                        color: $textColorDark;
+                        background: #FFF8F3;
+
+                        .links { color: $textColorDark; }
+                    }
+                }
+
+                &.watching{
+                    .headerLink{
+                        background: #007bff;
+                        color: #FFF8F3;
+
+                        .links { color: #FFF8F3; }
+                    }
+                }
+
+                &.menu-open{
+                    .slide{
+                        transform: translate(0, -50%) rotate(-90deg);
+                    }
+                }
+
+                .wrap{
+                    max-height: 0;
+                    height: auto;
+                    overflow: hidden;
+                    transition: max-height .3s;
+                }
+            }
+        }
+    }
+}

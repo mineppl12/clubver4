@@ -1,0 +1,32 @@
+$jshsusColorLight: #ade8e3;
+$jshsusColorLight2: #69c9c0;
+$jshsusColorDark: #35948a;
+
+$backgroundColor: #f0f0f0;
+$textColorLight: #f0f0f0;
+$textColorDark: #121212;
+
+$sidebarWidth: 300px;
+$navbarHeight: 100px;
+$space: 10px;
+
+$devMode: false;
+
+@mixin keyframes($animation-name) {
+    @-webkit-keyframes #{$animation-name} {
+        @content;
+    }
+    @keyframes #{$animation-name} {
+        @content;
+    }
+}
+  
+@mixin animation($str){
+    -webkit-animation: #{$str};
+    animation: #{$str};
+}
+
+@font-face {
+    font-family: "Sejong";
+    src: url("/font/sejong.ttf");
+}

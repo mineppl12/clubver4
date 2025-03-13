@@ -1,0 +1,43 @@
+@use "~shared/styles/variables.scss" as *;
+
+.navbar{
+    $height: $navbarHeight;
+
+    width: calc(100% - $sidebarWidth);
+    height: $height;
+    position: absolute !important;
+    right: 0;
+    border: none !important;
+    @if ($devMode) { background: #fac; }
+
+    .navbar_wrap{
+        width: calc(100% - $space * 2);
+        height: calc(100% - $space * 2);
+        background: #f9f9f9;
+        position: absolute;
+        top: calc($space * 1.5); left: calc($space * 0.5);
+        border-radius: $space;
+        display: flex;
+        flex-flow: wrap;
+        align-items: center;
+        border: none !important;
+    }
+
+    .nav-item{
+        width: max-content;
+        height: 2.5rem;
+
+        .nav-link{
+            color: rgba(#000, .6);
+            font-size: 1rem;
+            line-height: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            padding-inline: 1.5rem;
+        }
+    }
+
+    .account{
+        margin-left: auto;
+    }
+}
