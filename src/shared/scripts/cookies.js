@@ -10,4 +10,8 @@ const getCookie = (name) => {
     return cookies.get(name); 
 }
 
-export {setCookie, getCookie};
+const removeCookie = (name, value) => {
+    return cookies.remove(name, {path: '/'});
+};
+
+export {setCookie, getCookie, removeCookie};

@@ -1,9 +1,9 @@
-import BrowserRouter from "./routerProvider";
+import AppRouter from "./routerProvider";
 
 function Provider(){
     return(
         <>
-            <BrowserRouter />
+            <AppRouter />
         </>
     );
 }

@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import{ useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 
 import axios from "axios";
@@ -16,7 +16,7 @@ import { Card, Button, Dropdown } from "react-bootstrap";
 
 const TITLE = import.meta.env.VITE_TITLE;
 
-function AdminClubs() {
+function ManageClubs() {
     const [tableData, setTableData] = useState([]);
     const [columns, setColumns] = useState([]);
 
@@ -38,7 +38,7 @@ function AdminClubs() {
 
     async function init() {
         const sessionID = await accessKey();
-        const data = await getData("https://points.jshsus.kr/api/clubs", { sessionID });
+        const data = await getData("https://points.jshsus.kr/api/clubs/manage", { sessionID });
 
         dataRef.current = data;
         setupTable(data);
@@ -56,56 +56,57 @@ function AdminClubs() {
         if (!data) return;
 
         const dataList = data.map((x) => {
-        const {
-            id,
-            name,
-            leader,
-            type,
-            maxPeople,
-            hasInterview,
-            hasResume,
-            applicantsCount,
-            resumeLink,
-            interviewInfo,
-        } = x;
+            const {
+                id,
+                name,
+                leader,
+                type,
+                maxPeople,
+                hasInterview,
+                hasResume,
+                applicantsCount,
+                resumeLink,
+                interviewInfo,
+            } = x;
 
-        return [
-            id,
-            name,
-            leader ? `${leader.name} (${leader.stuid})` : "없음",
-            leader ? leader.stuid : 0,
-            type.type.replace(/(.*) 동아리/i, "$1"),
-            type.id,
-            maxPeople,
-            maxPeople > 0 ? (applicantsCount > 0 ? `${(applicantsCount / maxPeople).toFixed(2)} : 1 (${applicantsCount}명)` : "-") : `${applicantsCount}명`,
-            maxPeople > 0 ? applicantsCount / maxPeople : 0,
-            hasInterview ? 
+            return [
+                id,
+                name,
+                leader ? `${leader.name} (${leader.stuid})` : "없음",
+                leader ? leader.stuid : 0,
+                type.type.replace(/(.*) 동아리/i, "$1"),
+                type.id,
+                maxPeople,
+                applicantsCount > 0 ? `${applicantsCount / maxPeople} : 1 (${applicantsCount}명)` : "-",
+                applicantsCount > 0 ? applicantsCount / maxPeople : 0,
+                hasInterview ? (
+                    <Button
+                        className="rowButton"
+                        variant="primary"
+                        size="sm"
+                        onClick={() => interviewHandler(x)}
+                    >
+                    면접 정보 </Button>
+                ) : "없음",
+                hasResume ? (
+                    <Button
+                        className="rowButton"
+                        variant="primary"
+                        size="sm"
+                        onClick={() => resumeHandler(x)}
+                    >
+                    지원서 링크
+                    </Button>
+                ) : "없음",
                 <Button
                     className="rowButton"
                     variant="primary"
                     size="sm"
-                    onClick={() => interviewHandler(x)}
+                    onClick={() => removeHandler(x)}
                 >
-                면접 정보
-                </Button> : "없음",
-            hasResume ? 
-                <Button
-                    className="rowButton"
-                    variant="primary"
-                    size="sm"
-                    onClick={() => resumeHandler(x)}
-                >
-                지원서 링크
-                </Button> : "없음",
-            <Button
-                className="rowButton"
-                variant="primary"
-                size="sm"
-                onClick={() => removeHandler(x)}
-            >
-                정보수정
-            </Button>
-        ];
+                    정보수정
+                </Button>
+            ];
         });
 
         setTableData(dataList);
@@ -124,9 +125,9 @@ function AdminClubs() {
                         <Dropdown.Menu>
                         {optionList.map((x, idx) => (
                             <Dropdown.Item
-                            key={idx}
-                            active={x.view == true}
-                            onClick={(e) => optionSelect(e, idx, optionList)}
+                                key={idx}
+                                active={x.view == true}
+                                onClick={(e) => optionSelect(e, idx, optionList)}
                             >
                             {x.data}
                             </Dropdown.Item>
@@ -142,97 +143,12 @@ function AdminClubs() {
             { hidden: true },
             { data: "면접", orderable: false },
             { data: "지원서", orderable: false },
-            { data: "기타정보", orderable: false }
+            { data: "기타정보", orderable: false },
         ]);
     }
 
     function optionHandler(e) {
         e.stopPropagation();
-    }
-
-    function resumeHandler(club) {
-        MySwal.fire({
-            title: `지원서 링크 수정`,
-            html: <textarea id="swal-club-resumeLink" className="swal2-textarea" placeholder="지원서 링크" defaultValue={club.resumeLink}></textarea>,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: "저장",
-            cancelButtonText: "취소",
-            preConfirm: () => {
-                return {
-                ...club,
-                resumeLink: document.getElementById("swal-club-resumeLink").value,
-                };
-            },
-            }).then((result) => {
-            if (result.isConfirmed) {
-                postClubs(club.id, result.value)
-                .then((response) => {
-                    init();
-
-                    MySwal.fire(
-                        "수정 완료!",
-                        "동아리 정보가 업데이트되었습니다.",
-                        "success"
-                    );
-                })
-                .catch((error) => {
-                    console.error("오류", error);
-                    if (error.response && error.response.status === 400) {
-                        MySwal.fire("지원 불가", error.response.data.message, "error");
-                    } else {
-                        MySwal.fire(
-                            "오류 발생",
-                            "작업 중 문제가 발생했습니다. 관리자에게 문의하세요.",
-                            "error"
-                        );
-                    }
-                });
-            }
-        });
-    }
-
-    function interviewHandler(club) {
-        MySwal.fire({
-        title: `면접 정보 수정`,
-        html: <textarea id="swal-club-interviewInfo" className="swal2-textarea" placeholder="지원서 링크" defaultValue={club.interviewInfo}></textarea>,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: "저장",
-        cancelButtonText: "취소",
-        preConfirm: () => {
-            return {
-            ...club,
-            interviewInfo: document.getElementById("swal-club-interviewInfo")
-                .value,
-            };
-        },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                postClubs(club.id, result.value)
-                .then((response) => {
-                    init();
-
-                    MySwal.fire(
-                        "수정 완료!",
-                        "동아리 정보가 업데이트되었습니다.",
-                        "success"
-                    );
-                })
-                .catch((error) => {
-                    console.error("오류", error);
-                    if (error.response && error.response.status === 400) {
-                        MySwal.fire("수정 불가", error.response.data.message, "error");
-                    } else {
-                        MySwal.fire(
-                            "오류 발생",
-                            "작업 중 문제가 발생했습니다. 관리자에게 문의하세요.",
-                            "error"
-                        );
-                    }
-                });
-            }
-        });
     }
 
     function optionSelect(e, idx, list) {
@@ -251,7 +167,8 @@ function AdminClubs() {
         setupTable(finalData);
     }
 
-    function removeHandler(club){
+    function removeHandler(club) {
+        console.log(club);
         MySwal.fire({
             title: `${club.name} 정보 수정`,
             html: `
@@ -288,11 +205,96 @@ function AdminClubs() {
                         document.getElementById("swal-max-people").value,
                         10
                     ),
-                    hasInterview: document.getElementById("swal-has-interview").value === "1",
+                    hasInterview:
+                        document.getElementById("swal-has-interview").value === "1",
                     hasResume: document.getElementById("swal-has-resume").value === "1",
                 };
             },
-        }).then((result) => {
+            }).then((result) => {
+            if (result.isConfirmed) {
+                postClubs(club.id, result.value)
+                .then((response) => {
+                    init();
+
+                    MySwal.fire(
+                        "수정 완료!",
+                        "동아리 정보가 업데이트되었습니다.",
+                        "success"
+                    );
+                })
+                .catch((error) => {
+                    console.error("오류", error);
+                    if (error.response && error.response.status === 400) {
+                        MySwal.fire("지원 불가", error.response.data.message, "error");
+                    } else {
+                        MySwal.fire(
+                            "오류 발생",
+                            "작업 중 문제가 발생했습니다. 관리자에게 문의하세요.",
+                            "error"
+                        );
+                    }
+                });
+            }
+        });
+    }
+
+    function resumeHandler(club) {
+        MySwal.fire({
+            title: `지원서 링크 수정`,
+            html: <textarea id="swal-club-resumeLink" className="swal2-textarea" placeholder="지원서 링크" defaultValue={club.resumeLink}></textarea>,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: "저장",
+            cancelButtonText: "취소",
+            preConfirm: () => {
+                return {
+                    ...club,
+                    resumeLink: document.getElementById("swal-club-resumeLink").value,
+                };
+            },
+            }).then((result) => {
+            if (result.isConfirmed) {
+                postClubs(club.id, result.value)
+                .then((response) => {
+                    init();
+
+                    MySwal.fire(
+                        "수정 완료!",
+                        "동아리 정보가 업데이트되었습니다.",
+                        "success"
+                    );
+                })
+                .catch((error) => {
+                    console.error("오류", error);
+                    if (error.response && error.response.status === 400) {
+                        MySwal.fire("지원 불가", error.response.data.message, "error");
+                    } else {
+                        MySwal.fire(
+                            "오류 발생",
+                            "작업 중 문제가 발생했습니다. 관리자에게 문의하세요.",
+                            "error"
+                        );
+                    }
+                });
+            }
+        });
+    }
+
+    function interviewHandler(club) {
+        MySwal.fire({
+            title: `면접 정보 수정`,
+            html: <textarea id="swal-club-interviewInfo" className="swal2-textarea" placeholder="지원서 링크" defaultValue={club.interviewInfo}></textarea>,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: "저장",
+            cancelButtonText: "취소",
+            preConfirm: () => {
+                return {
+                    ...club,
+                    interviewInfo: document.getElementById("swal-club-interviewInfo").value,
+                };
+            },
+            }).then((result) => {
             if (result.isConfirmed) {
                 postClubs(club.id, result.value)
                 .then((response) => {
@@ -324,29 +326,29 @@ function AdminClubs() {
         <>
         <div id="apply">
             <Card>
-            <Card.Header>
-                <Card.Title>동아리 신청하기</Card.Title>
-            </Card.Header>
-            <Card.Body>
-                <div className="tableWrap">
-                <Card.Text className="label">전체 동아리 목록</Card.Text>
-                <DataTable
-                    className="applyTable"
-                    columns={columns}
-                    data={tableData}
-                    order={[4, "asc"]}
-                    options={{
-                    language: {
-                        search: "통합 검색: ",
-                    },
-                    }}
-                />
-                </div>
-            </Card.Body>
+                <Card.Header>
+                    <Card.Title>동아리 신청하기</Card.Title>
+                </Card.Header>
+                <Card.Body>
+                    <div className="tableWrap">
+                    <Card.Text className="label">전체 동아리 목록</Card.Text>
+                    <DataTable
+                        className="applyTable"
+                        columns={columns}
+                        data={tableData}
+                        order={[4, "asc"]}
+                        options={{
+                        language: {
+                            search: "통합 검색: ",
+                        },
+                        }}
+                    />
+                    </div>
+                </Card.Body>
             </Card>
         </div>
         </>
     );
 }
 
-export default AdminClubs;
+export default ManageClubs;

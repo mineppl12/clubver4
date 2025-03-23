@@ -16,4 +16,12 @@ async function postData(url, params = {}){
     return response.data;
 }
 
-export {getData, postData};
+async function putData(url, params = {}){
+    const response = await axios.put(`${url}`, {
+        params: params
+    });
+
+    return response.data;
+}
+
+export {getData, postData, putData};

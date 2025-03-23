@@ -42,6 +42,12 @@ export const pathKeys = {
                 permission: "manager",
             };
         },
+        clubs() {
+            return {
+                link: pathKeys.manage.root().concat("clubs/"),
+                permission: "manager",
+            };
+        },
     },
     admin: {
         root() {

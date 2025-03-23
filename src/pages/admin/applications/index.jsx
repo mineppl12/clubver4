@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import moment from "moment";
 
+import accessKey from "~shared/scripts/accessKey.js";
+import { getData, postData, putData } from "~shared/scripts/getData.js";
+
 import DataTable from "~shared/ui/datatable";
 import MySwal from "~shared/ui/sweetalert";
 
@@ -12,14 +15,6 @@ import "./index.scss";
 import { Card, Button, Dropdown } from "react-bootstrap";
 
 const TITLE = import.meta.env.VITE_TITLE;
-
-async function getData(url, params = {}) {
-    const response = await axios.get(`${url}`, {
-        params: params,
-    });
-
-    return response.data;
-}
 
 function AdminApplications() {
     const [tableData, setTableData] = useState([]);
@@ -42,9 +37,8 @@ function AdminApplications() {
     }, []);
 
     async function init() {
-        const data = await getData(
-        "https://points.jshsus.kr/api/clubs/admin/applications"
-        );
+        const sessionID = await accessKey();
+        const data = await getData("https://points.jshsus.kr/api/clubs/admin/applications", {sessionID});
 
         dataRef.current = data;
         setupTable(data);
@@ -54,53 +48,47 @@ function AdminApplications() {
         if (!data) return;
 
         const dataList = data.map((x) => {
-        const { id, user, club, leader, type } = x;
+            const { id, user, club, createdAt, isApproved, type } = x;
 
-        return [
-            id,
-            `${user.name} (${user.stuid})`,
-            user.stuid,
-            club.name,
-            leader ? leader.name : "없음",
-            type,
-            type,
-            moment(createdAt).format("YYYY-MM-DD HH:MM:SS"),
-            "O",
-        ];
+            return [
+                id,
+                club.name,
+                type.type.replace(/(.*) 동아리/i, "$1"),
+                type.id,
+                `${user.name} (${user.stuid})`,
+                user.stuid,
+                moment(createdAt).format("YYYY-MM-DD HH:mm:ss"),
+                isApproved ? "O" : "X"
+            ];
         });
 
         setTableData(dataList);
         setColumns([
-        { data: "ID" },
-        { data: "지원자" },
-        { hidden: true },
-        { data: "동아리 이름" },
-        { data: "동아리 짱" },
-        {
-            className: "dt-content",
-            data: (
-            <Dropdown onClick={optionHandler} autoClose="outside">
-                <Dropdown.Toggle variant="primary" id="dropdown-basic" size="sm">
-                동아리 종류
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                {optionList.map((x, idx) => (
-                    <Dropdown.Item
-                    key={idx}
-                    active={x.view == true}
-                    onClick={(e) => optionSelect(e, idx, optionList)}
-                    >
-                    {x.data}
-                    </Dropdown.Item>
-                ))}
-                </Dropdown.Menu>
-            </Dropdown>
-            ),
-            orderBase: 6,
-        },
-        { hidden: true },
-        { data: "신청 날짜" },
-        { data: "통과 여부", orderable: false },
+            { data: "ID" },
+            { data: "동아리 이름" },
+            { data: (
+                <Dropdown onClick={optionHandler} autoClose="outside">
+                    <Dropdown.Toggle variant="primary" id="dropdown-basic" size="sm">
+                    동아리 종류
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                        {optionList.map((x, idx) => (
+                            <Dropdown.Item
+                            key={idx}
+                            active={x.view == true}
+                            onClick={(e) => optionSelect(e, idx, optionList)}
+                            >
+                            {x.data}
+                            </Dropdown.Item>
+                        ))}
+                    </Dropdown.Menu>
+                </Dropdown>
+            ), orderBase: 3 },
+            { hidden: true },
+            { data: "지원자", orderBase: 5 },
+            { hidden: true },
+            { data: "지원 날짜" },
+            { data: "합격 여부" },
         ]);
     }
 
@@ -115,9 +103,9 @@ function AdminApplications() {
         arr[idx].view = !arr[idx].view;
 
         const finalData = dataRef.current.filter((data) => {
-        const { type } = data;
+            const { type } = data;
 
-        return arr[type - 1].view;
+            return arr[type.id - 1].view;
         });
 
         setOptionList(arr);
