@@ -210,6 +210,8 @@ function ManageApplications() {
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
+    ws["!autofilter"] = { ref: XLSX.utils.encode_range(ws["!ref"]) };
+
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
     XLSX.writeFile(
       wb,
