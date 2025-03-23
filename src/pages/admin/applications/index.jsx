@@ -125,7 +125,8 @@ function AdminApplications() {
         ID: x[0],
         "동아리 이름": x[1],
         "동아리 종류": x[2],
-        지원자: x[4],
+        이름: x[4].split(" ")[0],
+        학번: x[5],
         "지원 날짜": x[6],
         "합격 여부": x[7],
       };
@@ -136,7 +137,7 @@ function AdminApplications() {
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
     XLSX.writeFile(
       wb,
-      `동아리 신청내역 ${moment().format("YYYY-MM-DD HH:mm:ss")}.xlsx`
+      `동아리 신청내역 ${moment().format("YYYY-MM-DD HH-mm-ss")}.xlsx`
     );
   };
 
